@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { products } from "@/data/products";
-import heroImage from "@/assets/hero-image.jpg";
+import heroImage from "@/assets/hero-image-optimized.jpg";
 
 const Index = () => {
   const featuredProducts = products.filter(p => p.category === 'new').slice(0, 4);
