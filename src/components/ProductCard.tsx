@@ -10,9 +10,14 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const whatsappMessage = `Bonjour, je suis intéressé(e) par le produit: ${product.name} - ${product.price.toLocaleString()} FCFA`;
   const whatsappUrl = `https://wa.me/2256439791?text=${encodeURIComponent(whatsappMessage)}`;
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    setTimeout(() => openCart(), 300);
+  };
 
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-elegant">
@@ -42,7 +47,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <Button 
           className="flex-1" 
           size="sm"
-          onClick={() => addToCart(product)}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Panier

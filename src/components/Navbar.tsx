@@ -6,7 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import logo from "@/assets/logo-optimized.jpg";
 
 const Navbar = () => {
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
   const navigation = [
     { name: "Accueil", href: "/" },
     { name: "Boutique", href: "/shop" },
@@ -35,7 +35,12 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="hidden md:flex relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hidden md:flex relative"
+            onClick={openCart}
+          >
             <ShoppingCart className="h-5 w-5" />
             {totalItems > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-xs text-primary-foreground flex items-center justify-center">
@@ -62,7 +67,7 @@ const Navbar = () => {
                     {item.name}
                   </Link>
                 ))}
-                <Button className="w-full relative">
+                <Button className="w-full relative" onClick={openCart}>
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   Panier
                   {totalItems > 0 && (
