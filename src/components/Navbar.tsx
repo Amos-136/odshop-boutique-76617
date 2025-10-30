@@ -16,7 +16,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container flex h-20 items-center justify-between">
         <Link to="/" className="flex items-center space-x-3">
-          <img src={logo} alt="OD Shop" className="h-12 w-auto" />
+          <img src={logo} alt="OD Shop - Boutique de mode et beauté" className="h-12 w-auto" width="78" height="48" />
         </Link>
 
         {/* Desktop Navigation */}

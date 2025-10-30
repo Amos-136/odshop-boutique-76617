@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <img src={logo} alt="OD Shop" className="h-12 w-auto" />
+            <img src={logo} alt="OD Shop - Boutique de mode et beauté" className="h-12 w-auto" width="78" height="48" loading="lazy" />
             <p className="text-sm text-muted-foreground">
               Accessoires tendance & produits de beauté de qualité pour sublimer votre style au quotidien
             </p>

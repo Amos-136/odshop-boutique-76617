@@ -50,8 +50,12 @@ const Index = () => {
             <div className="relative">
               <img
                 src={heroImage}
-                alt="OD Shop Collection"
+                alt="OD Shop Collection - Accessoires de mode et produits de beauté premium"
                 className="rounded-lg shadow-elegant"
+                width="612"
+                height="344"
+                fetchPriority="high"
+                loading="eager"
               />
             </div>
           </div>
