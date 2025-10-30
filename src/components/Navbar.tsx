@@ -1,17 +1,29 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu } from "lucide-react";
+import { ShoppingCart, Menu, User, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo-optimized.jpg";
 
 const Navbar = () => {
   const { totalItems, openCart } = useCart();
+  const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+
   const navigation = [
-    { name: "Accueil", href: "/" },
-    { name: "Boutique", href: "/shop" },
-    { name: "À propos", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: t('home'), href: "/" },
+    { name: t('shop'), href: "/shop" },
+    { name: t('about'), href: "/about" },
+    { name: t('contact'), href: "/contact" },
   ];
 
   return (
@@ -34,7 +46,49 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2">
+          {/* Language Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="hidden md:flex">
+                <Globe className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setLanguage('fr')}>
+                🇫🇷 Français
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('en')}>
+                🇬🇧 English
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Menu */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hidden md:flex">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link to="/account">{t('account')}</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {t('signOut')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild variant="ghost" className="hidden md:flex">
+              <Link to="/auth">{t('signIn')}</Link>
+            </Button>
+          )}
+
+          {/* Cart Button */}
           <Button 
             variant="ghost" 
             size="icon" 
@@ -43,9 +97,12 @@ const Navbar = () => {
           >
             <ShoppingCart className="h-5 w-5" />
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-xs text-primary-foreground flex items-center justify-center">
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
                 {totalItems}
-              </span>
+              </Badge>
             )}
           </Button>
 
@@ -67,15 +124,51 @@ const Navbar = () => {
                     {item.name}
                   </Link>
                 ))}
+                
+                {user ? (
+                  <>
+                    <Link to="/account" className="text-lg font-medium">
+                      {t('account')}
+                    </Link>
+                    <Button variant="outline" onClick={signOut} className="w-full">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {t('signOut')}
+                    </Button>
+                  </>
+                ) : (
+                  <Button asChild className="w-full">
+                    <Link to="/auth">{t('signIn')}</Link>
+                  </Button>
+                )}
+                
                 <Button className="w-full relative" onClick={openCart}>
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Panier
+                  {t('cart')}
                   {totalItems > 0 && (
-                    <span className="ml-2 rounded-full bg-primary-foreground text-primary px-2 py-0.5 text-xs font-bold">
+                    <Badge variant="secondary" className="ml-2">
                       {totalItems}
-                    </span>
+                    </Badge>
                   )}
                 </Button>
+
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setLanguage('fr')}
+                    className="flex-1"
+                  >
+                    🇫🇷 FR
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setLanguage('en')}
+                    className="flex-1"
+                  >
+                    🇬🇧 EN
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

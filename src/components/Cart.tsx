@@ -1,11 +1,17 @@
 import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Separator } from "@/components/ui/separator";
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, isOpen, closeCart, clearCart } = useCart();
+  const { user } = useAuth();
+  const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const generateWhatsAppMessage = () => {
     if (items.length === 0) return "";
@@ -18,12 +24,22 @@ const Cart = () => {
     
     message += `\n💰 Total : ${totalPrice.toLocaleString()} FCFA`;
     
-    return encodeURIComponent(message);
+    return message;
   };
 
-  const handleOrder = () => {
+  const handleWhatsAppOrder = () => {
     const message = generateWhatsAppMessage();
-    window.open(`https://wa.me/2256439791?text=${message}`, '_blank');
+    window.open(`https://wa.me/2256439791?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleCheckout = () => {
+    if (!user) {
+      navigate('/auth');
+      closeCart();
+      return;
+    }
+    closeCart();
+    navigate('/checkout');
   };
 
   return (
@@ -32,7 +48,7 @@ const Cart = () => {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Mon Panier ({items.length})
+            {t('myCart')} ({items.length})
           </SheetTitle>
         </SheetHeader>
 
@@ -40,7 +56,7 @@ const Cart = () => {
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium text-foreground mb-2">Votre panier est vide</p>
+              <p className="text-lg font-medium text-foreground mb-2">{t('emptyCart')}</p>
               <p className="text-sm text-muted-foreground">
                 Ajoutez des produits pour commencer vos achats
               </p>
@@ -107,22 +123,29 @@ const Cart = () => {
             <Separator className="my-4" />
             <SheetFooter className="flex-col gap-4">
               <div className="flex items-center justify-between text-lg font-bold">
-                <span>Total</span>
+                <span>{t('total')}</span>
                 <span className="text-primary">{totalPrice.toLocaleString()} FCFA</span>
               </div>
               <Button
                 className="w-full"
                 size="lg"
-                onClick={handleOrder}
+                onClick={handleCheckout}
               >
-                Commander via WhatsApp
+                {t('checkout')}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
+                onClick={handleWhatsAppOrder}
+              >
+                {t('orderWhatsApp')}
               </Button>
               <Button
                 variant="outline"
                 className="w-full"
                 onClick={clearCart}
               >
-                Vider le panier
+                {t('clearCart')}
               </Button>
             </SheetFooter>
           </>
