@@ -17,9 +17,39 @@ export const products: Product[] = [
     price: 18000,
     description: 'Sac à main en cuir synthétique haut de gamme, parfait pour le bureau ou les sorties chics.',
     category: 'accessories',
-    image: '/src/assets/products/bags-collection.jpg',
+    image: '/src/assets/products/luxury-bags-1.jpg',
     colors: ['Noir', 'Beige', 'Rouge', 'Blanc'],
     details: ['Livraison rapide partout en Côte d\'Ivoire 🚚', 'Qualité premium', 'Design élégant']
+  },
+  {
+    id: 'sac-luxury-collection',
+    name: 'Sac Luxury Collection',
+    price: 22000,
+    description: 'Sacs de luxe en plusieurs coloris, design sophistiqué avec finitions dorées.',
+    category: 'accessories',
+    image: '/src/assets/products/luxury-bags-3.jpg',
+    colors: ['Blanc', 'Noir', 'Marron', 'Vert'],
+    details: ['Finitions dorées', 'Qualité supérieure', 'Plusieurs coloris disponibles']
+  },
+  {
+    id: 'sac-trendy-colors',
+    name: 'Sac Trendy Colors',
+    price: 19000,
+    description: 'Collection de sacs colorés et tendance pour tous les styles.',
+    category: 'accessories',
+    image: '/src/assets/products/luxury-bags-4.jpg',
+    colors: ['Rose', 'Jaune', 'Blanc', 'Rouge', 'Marron'],
+    details: ['Design moderne', 'Bandoulière ajustable', 'Plusieurs coloris']
+  },
+  {
+    id: 'sac-designer-style',
+    name: 'Sac Designer Style',
+    price: 25000,
+    description: 'Sac style designer avec motifs signature et détails luxueux.',
+    category: 'accessories',
+    image: '/src/assets/products/luxury-bags-2.jpg',
+    colors: ['Noir', 'Beige', 'Marron'],
+    details: ['Style designer', 'Qualité exceptionnelle', 'Emballage cadeau inclus']
   },
   {
     id: 'montre-classy-gold',
@@ -50,6 +80,15 @@ export const products: Product[] = [
     image: '/src/assets/products/bags-collection.jpg',
     colors: ['Rose Naturel', 'Nude', 'Corail', 'Berry'],
     details: ['Disponible en 4 teintes naturelles', 'Tenue longue durée', 'Hydratation intense']
+  },
+  {
+    id: 'crystal-shine-mist',
+    name: 'Crystal Shine Mist Spray',
+    price: 6500,
+    description: 'Spray brillance intense pour cheveux, effet cristal et contrôle des frisottis.',
+    category: 'beauty',
+    image: '/src/assets/products/crystal-mist.jpg',
+    details: ['Brillance intense', 'Anti-frisottis', 'Format pratique']
   },
   {
     id: 'creme-hydratante-od-skin',
@@ -153,6 +192,60 @@ export const products: Product[] = [
     details: ['100 ML / 3.38 FL OZ', 'Mixte', 'Notes intenses']
   },
   {
+    id: 'torride-eau-de-parfum',
+    name: 'Ô Torride Eau de Parfum',
+    price: 11000,
+    description: 'Parfum captivant disponible pour lui et pour elle, notes sensuelles et élégantes.',
+    category: 'perfumes',
+    image: '/src/assets/products/torride-elixir.jpg',
+    details: ['Pour Lui et Pour Elle', 'Notes sensuelles', 'Tenue longue durée']
+  },
+  {
+    id: 'elixir-collection',
+    name: 'Elixir Collection Eau de Parfum',
+    price: 9000,
+    description: 'Le parfum irrésistible pour femme, notes florales et fruitées captivantes.',
+    category: 'perfumes',
+    image: '/src/assets/products/torride-elixir.jpg',
+    details: ['Collection exclusive', 'Notes florales et fruitées', 'Irresistible']
+  },
+  {
+    id: 'fidele-eau-de-parfum',
+    name: 'Fidèle Eau de Parfum',
+    price: 18000,
+    description: 'Parfum féminin délicat et raffiné, notes florales romantiques.',
+    category: 'perfumes',
+    image: '/src/assets/products/fidele-malice.jpg',
+    details: ['Notes florales', 'Romantique et délicat', 'Tenue : +10 heures']
+  },
+  {
+    id: 'malice-eau-de-parfum',
+    name: 'Malice Eau de Parfum',
+    price: 7000,
+    description: 'Parfum pétillant et enjoué, parfait pour la femme moderne.',
+    category: 'perfumes',
+    image: '/src/assets/products/fidele-malice.jpg',
+    details: ['Notes pétillantes', 'Fraîcheur durable', 'Style moderne']
+  },
+  {
+    id: 'saint-jean-parfum',
+    name: 'Saint-Jean Eau de Parfum',
+    price: 11000,
+    description: 'Parfum masculin intense et élégant aux notes profondes.',
+    category: 'perfumes',
+    image: '/src/assets/products/saint-jean-coach.jpg',
+    details: ['Masculin intense', 'Notes profondes', 'Tenue exceptionnelle']
+  },
+  {
+    id: 'coach-collection',
+    name: 'Coach Eau de Parfum Collection',
+    price: 13000,
+    description: 'Collection de parfums Coach pour homme et femme, élégance et raffinement.',
+    category: 'perfumes',
+    image: '/src/assets/products/saint-jean-coach.jpg',
+    details: ['Pour Homme et Femme', 'Notes élégantes', 'Collection signature']
+  },
+  {
     id: 'deodorant-fresh-day',
     name: 'Déodorant Fresh Day',
     price: 5000,
@@ -169,7 +262,7 @@ export const products: Product[] = [
     price: 14000,
     description: 'Petit sac tendance à bandoulière, idéal pour vos sorties.',
     category: 'new',
-    image: '/src/assets/products/bags-collection.jpg',
+    image: '/src/assets/products/luxury-bags-2.jpg',
     colors: ['Rose poudré', 'Noir', 'Kaki'],
     details: ['Design tendance', 'Bandoulière ajustable', 'Compact et pratique']
   },
