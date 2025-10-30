@@ -3,12 +3,14 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Product } from "@/data/products";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { addToCart } = useCart();
   const whatsappMessage = `Bonjour, je suis intéressé(e) par le produit: ${product.name} - ${product.price.toLocaleString()} FCFA`;
   const whatsappUrl = `https://wa.me/2256439791?text=${encodeURIComponent(whatsappMessage)}`;
 
@@ -37,7 +39,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button className="flex-1" size="sm">
+        <Button 
+          className="flex-1" 
+          size="sm"
+          onClick={() => addToCart(product)}
+        >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Panier
         </Button>
