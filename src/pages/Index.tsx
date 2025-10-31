@@ -41,7 +41,7 @@ const Index = () => {
                   className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
                   asChild
                 >
-                  <a href="https://wa.me/2256439791?text=Bonjour%20OD%20Shop" target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/2250564397919?text=Bonjour%20OD%20Shop" target="_blank" rel="noopener noreferrer">
                     Commander sur WhatsApp
                   </a>
                 </Button>

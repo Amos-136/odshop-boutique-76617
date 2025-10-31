@@ -12,7 +12,7 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart, openCart } = useCart();
   const whatsappMessage = `Bonjour, je suis intéressé(e) par le produit: ${product.name} - ${product.price.toLocaleString()} FCFA`;
-  const whatsappUrl = `https://wa.me/2256439791?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappUrl = `https://wa.me/2250564397919?text=${encodeURIComponent(whatsappMessage)}`;
 
   const handleAddToCart = () => {
     addToCart(product);

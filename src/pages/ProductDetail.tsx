@@ -38,7 +38,7 @@ const ProductDetail = () => {
   }
 
   const whatsappMessage = `Bonjour, je suis intéressé(e) par le produit: ${product.name} - ${product.price.toLocaleString()} FCFA`;
-  const whatsappUrl = `https://wa.me/22564397919?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappUrl = `https://wa.me/2250564397919?text=${encodeURIComponent(whatsappMessage)}`;
 
   const handleAddToCart = () => {
     addToCart(product);

@@ -29,7 +29,7 @@ const Cart = () => {
 
   const handleWhatsAppOrder = () => {
     const message = generateWhatsAppMessage();
-    window.open(`https://wa.me/2256439791?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/2250564397919?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleCheckout = () => {

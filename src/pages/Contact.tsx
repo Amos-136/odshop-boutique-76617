@@ -80,7 +80,7 @@ const Contact = () => {
                   className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
                   asChild
                 >
-                  <a href="https://wa.me/2256439791?text=Bonjour%20OD%20Shop" target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/2250564397919?text=Bonjour%20OD%20Shop" target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 h-5 w-5" />
                     Ouvrir WhatsApp
                   </a>
