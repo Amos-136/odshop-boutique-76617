@@ -72,10 +72,12 @@ const ProductDetail = () => {
           <div className="space-y-6">
             <div>
               <Badge className="mb-2">
-                {product.category === 'accessories' && 'Accessoires'}
-                {product.category === 'beauty' && 'Beauté'}
-                {product.category === 'perfumes' && 'Parfums'}
-                {product.category === 'new' && 'Nouveauté'}
+                {product.category === 'bebe' && 'Bébé'}
+                {product.category === 'femmes' && 'Femmes'}
+                {product.category === 'garcons' && 'Garçons'}
+                {product.category === 'filles' && 'Filles'}
+                {product.category === 'hommes' && 'Hommes'}
+                {product.category === 'divers' && 'Divers'}
               </Badge>
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 {product.name}

@@ -9,8 +9,8 @@ import { products } from "@/data/products";
 import heroImage from "@/assets/hero-image-optimized.jpg";
 
 const Index = () => {
-  const featuredProducts = products.filter(p => p.category === 'new').slice(0, 4);
-  const bestSellers = products.slice(0, 4);
+  const featuredProducts = products.slice(0, 4);
+  const bestSellers = products.slice(4, 8);
 
   return (
     <div className="min-h-screen flex flex-col">
