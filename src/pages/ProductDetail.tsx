@@ -48,15 +48,15 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
-        <Button variant="ghost" asChild className="mb-6">
+      <main className="container mx-auto px-4 py-4 md:py-8">
+        <Button variant="ghost" size="sm" asChild className="mb-4 md:mb-6">
           <Link to="/shop">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour à la boutique
+            <span className="text-xs md:text-sm">Retour</span>
           </Link>
         </Button>
 
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
           {/* Image du produit */}
           <div className="space-y-4">
             <div className="aspect-square overflow-hidden rounded-lg bg-muted">
@@ -69,9 +69,9 @@ const ProductDetail = () => {
           </div>
 
           {/* Détails du produit */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <div>
-              <Badge className="mb-2">
+              <Badge className="mb-2 text-xs">
                 {product.category === 'bebe' && 'Bébé'}
                 {product.category === 'femmes' && 'Femmes'}
                 {product.category === 'garcons' && 'Garçons'}
@@ -79,26 +79,26 @@ const ProductDetail = () => {
                 {product.category === 'hommes' && 'Hommes'}
                 {product.category === 'divers' && 'Divers'}
               </Badge>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 {product.name}
               </h1>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-xl md:text-2xl font-bold text-primary">
                 {product.price.toLocaleString()} FCFA
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <div>
-                <h2 className="text-lg font-semibold mb-2">Description</h2>
-                <p className="text-muted-foreground">{product.description}</p>
+                <h2 className="text-base md:text-lg font-semibold mb-2">Description</h2>
+                <p className="text-sm md:text-base text-muted-foreground">{product.description}</p>
               </div>
 
               {product.colors && product.colors.length > 0 && (
                 <div>
-                  <h2 className="text-lg font-semibold mb-2">Couleurs disponibles</h2>
+                  <h2 className="text-base md:text-lg font-semibold mb-2">Couleurs disponibles</h2>
                   <div className="flex flex-wrap gap-2">
                     {product.colors.map((color) => (
-                      <Badge key={color} variant="outline">
+                      <Badge key={color} variant="outline" className="text-xs">
                         {color}
                       </Badge>
                     ))}
@@ -108,12 +108,12 @@ const ProductDetail = () => {
 
               {product.details && product.details.length > 0 && (
                 <div>
-                  <h2 className="text-lg font-semibold mb-2">Caractéristiques</h2>
+                  <h2 className="text-base md:text-lg font-semibold mb-2">Caractéristiques</h2>
                   <ul className="space-y-2">
                     {product.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{detail}</span>
+                        <Check className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-xs md:text-sm text-muted-foreground">{detail}</span>
                       </li>
                     ))}
                   </ul>
@@ -121,23 +121,22 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <div className="space-y-3 pt-4">
+            <div className="flex gap-2 md:gap-3 pt-2 md:pt-4">
               <Button 
-                className="w-full" 
+                className="flex-1" 
                 size="lg"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Ajouter au panier
+                <ShoppingCart className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-sm md:text-base">Panier</span>
               </Button>
               <Button 
-                className="w-full" 
-                variant="outline" 
+                className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" 
                 size="lg"
                 asChild
               >
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                  Commander via WhatsApp
+                  <span className="text-sm md:text-base">WhatsApp</span>
                 </a>
               </Button>
             </div>

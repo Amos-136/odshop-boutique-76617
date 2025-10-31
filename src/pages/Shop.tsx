@@ -29,26 +29,28 @@ const Shop = () => {
       
       <main className="flex-1">
         {/* Header */}
-        <section className="bg-gradient-hero py-16 text-primary-foreground">
+        <section className="bg-gradient-hero py-8 md:py-16 text-primary-foreground">
           <div className="container">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight">
               Notre Boutique
             </h1>
-            <p className="mt-4 text-lg text-primary-foreground/90">
+            <p className="mt-2 md:mt-4 text-sm md:text-lg text-primary-foreground/90">
               Découvrez toute notre collection de produits
             </p>
           </div>
         </section>
 
         {/* Filters */}
-        <section className="border-b bg-background py-6">
+        <section className="border-b bg-background py-4 md:py-6 sticky top-20 z-40 bg-background/95 backdrop-blur">
           <div className="container">
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <Button
                   key={category.id}
+                  size="sm"
                   variant={categoryParam === category.slug ? "default" : "outline"}
                   onClick={() => handleCategoryChange(category.slug)}
+                  className="text-xs md:text-sm"
                 >
                   {category.name}
                 </Button>
@@ -58,14 +60,14 @@ const Shop = () => {
         </section>
 
         {/* Products Grid */}
-        <section className="py-12">
+        <section className="py-6 md:py-12">
           <div className="container">
-            <div className="mb-6">
-              <p className="text-sm text-muted-foreground">
+            <div className="mb-4 md:mb-6">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
               </p>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

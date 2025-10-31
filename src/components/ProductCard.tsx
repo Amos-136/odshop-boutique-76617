@@ -30,36 +30,35 @@ const ProductCard = ({ product }: ProductCardProps) => {
           />
         </div>
       </Link>
-      <CardContent className="p-4">
+      <CardContent className="p-3 md:p-4">
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-semibold text-foreground transition-colors group-hover:text-primary">
+          <h3 className="font-semibold text-sm md:text-base text-foreground transition-colors group-hover:text-primary line-clamp-1">
             {product.name}
           </h3>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+          <p className="mt-1 text-xs md:text-sm text-muted-foreground line-clamp-2">
             {product.description}
           </p>
         </Link>
-        <p className="mt-2 text-lg font-bold text-primary">
+        <p className="mt-2 text-base md:text-lg font-bold text-primary">
           {product.price.toLocaleString()} FCFA
         </p>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex gap-2">
+      <CardFooter className="p-3 md:p-4 pt-0 flex gap-2">
         <Button 
           className="flex-1" 
           size="sm"
           onClick={handleAddToCart}
         >
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          Panier
+          <ShoppingCart className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
+          <span className="text-xs md:text-sm">Panier</span>
         </Button>
         <Button 
-          className="flex-1" 
-          variant="outline" 
+          className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" 
           size="sm"
           asChild
         >
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-            WhatsApp
+            <span className="text-xs md:text-sm">WhatsApp</span>
           </a>
         </Button>
       </CardFooter>

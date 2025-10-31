@@ -19,17 +19,17 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary-light/80" />
-        <div className="container relative py-24 md:py-32">
-          <div className="grid gap-12 md:grid-cols-2 md:items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+        <div className="container relative py-12 md:py-32">
+          <div className="grid gap-8 md:grid-cols-2 md:items-center">
+            <div className="space-y-4 md:space-y-6">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-6xl">
                 Accessoires tendance & produits de beauté de qualité
               </h1>
-              <p className="text-lg text-primary-foreground/90 md:text-xl">
+              <p className="text-base text-primary-foreground/90 md:text-xl">
                 Sublimez votre style au quotidien avec nos collections exclusives ✨
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button size="lg" asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                <Button size="lg" asChild className="bg-accent text-accent-foreground hover:bg-accent/90 w-full sm:w-auto">
                   <Link to="/shop">
                     Découvrir nos produits
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -38,7 +38,7 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary w-full sm:w-auto"
                   asChild
                 >
                   <a href="https://wa.me/2250564397919?text=Bonjour%20OD%20Shop" target="_blank" rel="noopener noreferrer">
@@ -47,7 +47,7 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative hidden md:block">
           <img
             src={heroImage}
             alt="OD Shop Collection - Accessoires de mode et produits de beauté premium"
@@ -62,39 +62,39 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-secondary/50">
+      <section className="py-8 md:py-16 bg-secondary/50">
         <div className="container">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="flex items-start space-x-4">
-              <div className="rounded-full bg-primary p-3">
-                <Sparkles className="h-6 w-6 text-primary-foreground" />
+          <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-3">
+            <div className="flex items-start space-x-3 md:space-x-4">
+              <div className="rounded-full bg-primary p-2 md:p-3 flex-shrink-0">
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold">Qualité Premium</h3>
-                <p className="text-sm text-muted-foreground">
-                  Produits soigneusement sélectionnés pour leur qualité
+                <h3 className="font-semibold text-sm md:text-base">Qualité Premium</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Produits soigneusement sélectionnés
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-4">
-              <div className="rounded-full bg-primary p-3">
-                <Truck className="h-6 w-6 text-primary-foreground" />
+            <div className="flex items-start space-x-3 md:space-x-4">
+              <div className="rounded-full bg-primary p-2 md:p-3 flex-shrink-0">
+                <Truck className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold">Livraison Rapide</h3>
-                <p className="text-sm text-muted-foreground">
-                  Livraison rapide partout en Côte d'Ivoire
+                <h3 className="font-semibold text-sm md:text-base">Livraison Rapide</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Livraison partout en Côte d'Ivoire
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-4">
-              <div className="rounded-full bg-primary p-3">
-                <ShoppingBag className="h-6 w-6 text-primary-foreground" />
+            <div className="flex items-start space-x-3 md:space-x-4">
+              <div className="rounded-full bg-primary p-2 md:p-3 flex-shrink-0">
+                <ShoppingBag className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold">Service Client</h3>
-                <p className="text-sm text-muted-foreground">
-                  Une équipe à votre écoute pour vous conseiller
+                <h3 className="font-semibold text-sm md:text-base">Service Client</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Une équipe à votre écoute
                 </p>
               </div>
             </div>
@@ -103,23 +103,23 @@ const Index = () => {
       </section>
 
       {/* Nouveautés */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <div className="mb-8 md:mb-12 text-center">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
               Nouveautés
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-2 md:mt-4 text-sm md:text-lg text-muted-foreground">
               Découvrez nos dernières collections
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          <div className="mt-12 text-center">
-            <Button size="lg" asChild>
+          <div className="mt-8 md:mt-12 text-center">
+            <Button size="lg" asChild className="w-full sm:w-auto">
               <Link to="/shop">
                 Voir tous les produits
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -130,17 +130,17 @@ const Index = () => {
       </section>
 
       {/* Best Sellers */}
-      <section className="py-16 bg-secondary/30">
+      <section className="py-8 md:py-16 bg-secondary/30">
         <div className="container">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <div className="mb-8 md:mb-12 text-center">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
               Meilleures Ventes
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-2 md:mt-4 text-sm md:text-lg text-muted-foreground">
               Les produits préférés de nos clients
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
             {bestSellers.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
