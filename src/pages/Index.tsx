@@ -39,7 +39,7 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary w-full sm:w-auto"
+                  className="border-white bg-white text-primary hover:bg-white/90 w-full sm:w-auto"
                   asChild
                 >
                   <a href="https://wa.me/2250564397919?text=Bonjour%20OD%20Shop" target="_blank" rel="noopener noreferrer">
