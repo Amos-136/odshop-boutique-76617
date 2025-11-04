@@ -107,7 +107,7 @@ const Checkout = () => {
         title: t('orderSuccess'),
         description: 'Nous vous enverrons un email de confirmation.',
       });
-      navigate('/account');
+      navigate(`/order-confirmation?order=${order.id}`);
     } catch (error) {
       console.error('Order error:', error);
       toast({
@@ -177,11 +177,19 @@ const Checkout = () => {
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="card" id="card" />
-                  <Label htmlFor="card">{t('bankCard')}</Label>
+                  <Label htmlFor="card">Carte bancaire (Visa / Mastercard)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="mobile-money" id="mobile-money" />
+                  <Label htmlFor="mobile-money">Mobile Money (Orange, MTN, Moov, Wave)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="cash" id="cash" />
-                  <Label htmlFor="cash">{t('cashOnDelivery')}</Label>
+                  <Label htmlFor="cash">Paiement à la livraison (Cash)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="pickup-pay" id="pickup-pay" />
+                  <Label htmlFor="pickup-pay">Paiement en boutique (Click & Collect)</Label>
                 </div>
               </RadioGroup>
             </CardContent>

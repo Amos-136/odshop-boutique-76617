@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ProductReviews from "@/components/ProductReviews";
+import SocialShare from "@/components/SocialShare";
+import RelatedProducts from "@/components/RelatedProducts";
 import { products } from "@/data/products";
 import { useCart } from "@/contexts/CartContext";
 
@@ -131,7 +134,7 @@ const ProductDetail = () => {
                 <span className="text-sm md:text-base">Panier</span>
               </Button>
               <Button 
-                className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" 
+                className="flex-1 bg-[#25D366] text-white hover:bg-[#25D366]/90" 
                 size="lg"
                 asChild
               >
@@ -140,8 +143,27 @@ const ProductDetail = () => {
                 </a>
               </Button>
             </div>
+
+            {/* Social Share */}
+            <div className="pt-4 border-t">
+              <SocialShare 
+                productName={product.name} 
+                productUrl={`/product/${product.id}`} 
+              />
+            </div>
           </div>
         </div>
+
+        {/* Reviews */}
+        <div className="mt-8 md:mt-12">
+          <ProductReviews />
+        </div>
+
+        {/* Related Products */}
+        <RelatedProducts 
+          currentProductId={product.id} 
+          category={product.category} 
+        />
       </main>
       <Footer />
       <WhatsAppButton />

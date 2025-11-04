@@ -6,14 +6,31 @@ import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { products, categories } from "@/data/products";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category') || 'all';
+  const [sortBy, setSortBy] = useState('default');
   
-  const filteredProducts = categoryParam === 'all' 
+  let filteredProducts = categoryParam === 'all' 
     ? products 
     : products.filter(p => p.category === categoryParam);
+
+  // Sort products
+  if (sortBy === 'price-asc') {
+    filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+  } else if (sortBy === 'price-desc') {
+    filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+  } else if (sortBy === 'name') {
+    filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   const handleCategoryChange = (category: string) => {
     if (category === 'all') {
@@ -62,10 +79,23 @@ const Shop = () => {
         {/* Products Grid */}
         <section className="py-6 md:py-12">
           <div className="container">
-            <div className="mb-4 md:mb-6">
+            <div className="mb-4 md:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <p className="text-xs md:text-sm text-muted-foreground">
                 {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
               </p>
+              <div className="w-full sm:w-auto">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-[200px] text-xs md:text-sm">
+                    <SelectValue placeholder="Trier par" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Par défaut</SelectItem>
+                    <SelectItem value="price-asc">Prix croissant</SelectItem>
+                    <SelectItem value="price-desc">Prix décroissant</SelectItem>
+                    <SelectItem value="name">Nom (A-Z)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredProducts.map((product) => (

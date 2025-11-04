@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, ShoppingBag, Truck } from "lucide-react";
+import { ArrowRight, Sparkles, ShoppingBag, Truck, Heart, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import Testimonials from "@/components/Testimonials";
 import { products } from "@/data/products";
 import heroImage from "@/assets/hero-image-optimized.jpg";
 
@@ -144,6 +145,64 @@ const Index = () => {
             {bestSellers.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* About OD Shop Section */}
+      <section className="py-8 md:py-16">
+        <div className="container">
+          <div className="mb-8 md:mb-12 text-center">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
+              Pourquoi choisir OD Shop ?
+            </h2>
+            <p className="mt-2 md:mt-4 text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Votre partenaire beauté et mode en Côte d'Ivoire
+            </p>
+          </div>
+          
+          <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-3 max-w-5xl mx-auto">
+            <div className="text-center p-4 md:p-6 rounded-lg bg-secondary/30">
+              <div className="mx-auto mb-3 md:mb-4 flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-full bg-primary">
+                <Award className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground" />
+              </div>
+              <h3 className="mb-2 text-base md:text-lg font-semibold">Qualité Garantie</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Tous nos produits sont soigneusement sélectionnés pour leur qualité exceptionnelle
+              </p>
+            </div>
+
+            <div className="text-center p-4 md:p-6 rounded-lg bg-secondary/30">
+              <div className="mx-auto mb-3 md:mb-4 flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-full bg-primary">
+                <Heart className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground" />
+              </div>
+              <h3 className="mb-2 text-base md:text-lg font-semibold">Service Dédié</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Une équipe passionnée à votre écoute pour vous conseiller et vous accompagner
+              </p>
+            </div>
+
+            <div className="text-center p-4 md:p-6 rounded-lg bg-secondary/30">
+              <div className="mx-auto mb-3 md:mb-4 flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-full bg-primary">
+                <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground" />
+              </div>
+              <h3 className="mb-2 text-base md:text-lg font-semibold">Tendances Mode</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Toujours à l'affût des dernières tendances pour sublimer votre style
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 md:mt-12 text-center">
+            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
+              <Link to="/about">
+                En savoir plus sur OD Shop
+                <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
