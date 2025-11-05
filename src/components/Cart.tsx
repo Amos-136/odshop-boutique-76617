@@ -263,42 +263,59 @@ const Cart = () => {
         {items.length > 0 && (
           <>
             <Separator className="my-4" />
-            <SheetFooter className="flex-col gap-4">
-              <div className="flex items-center justify-between text-lg font-bold">
-                <span>{t('total')}</span>
-                <span className="text-primary">{totalPrice.toLocaleString()} FCFA</span>
+            <div className="space-y-4">
+              {/* Total Section */}
+              <div className="bg-muted/50 rounded-lg p-4">
+                <div className="flex items-center justify-between text-lg font-bold">
+                  <span>{t('total')}</span>
+                  <span className="text-primary">{totalPrice.toLocaleString()} FCFA</span>
+                </div>
               </div>
+
+              {/* Primary Payment Buttons */}
+              <div className="space-y-3">
+                <Button
+                  className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all"
+                  size="lg"
+                  onClick={handlePayNow}
+                  disabled={loading}
+                >
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  {loading ? 'Chargement...' : 'Procéder au paiement 💰'}
+                </Button>
+                
+                <Button
+                  className="w-full"
+                  size="lg"
+                  variant="secondary"
+                  onClick={handleCheckout}
+                >
+                  {t('checkout')}
+                </Button>
+              </div>
+
+              {/* Alternative Payment Methods */}
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white border-[#25D366]"
+                  onClick={handleWhatsAppOrder}
+                >
+                  {t('orderWhatsApp')}
+                </Button>
+              </div>
+
+              <Separator />
+
+              {/* Clear Cart Button */}
               <Button
-                className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all"
-                size="lg"
-                onClick={handlePayNow}
-                disabled={loading}
-              >
-                <CreditCard className="mr-2 h-5 w-5" />
-                {loading ? 'Chargement...' : 'Procéder au paiement 💰'}
-              </Button>
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={handleCheckout}
-              >
-                {t('checkout')}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
-                onClick={handleWhatsAppOrder}
-              >
-                {t('orderWhatsApp')}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
+                variant="ghost"
+                className="w-full text-muted-foreground hover:text-destructive"
                 onClick={clearCart}
               >
                 {t('clearCart')}
               </Button>
-            </SheetFooter>
+            </div>
           </>
         )}
       </SheetContent>
