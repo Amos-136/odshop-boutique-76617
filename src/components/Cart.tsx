@@ -1,4 +1,4 @@
-import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
@@ -6,12 +6,20 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Separator } from "@/components/ui/separator";
+import { usePaystackPayment } from 'react-paystack';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, isOpen, closeCart, clearCart } = useCart();
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  
+  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '';
 
   const generateWhatsAppMessage = () => {
     if (items.length === 0) return "";
@@ -40,6 +48,120 @@ const Cart = () => {
     }
     closeCart();
     navigate('/checkout');
+  };
+
+  const handlePayNow = async () => {
+    if (!user) {
+      navigate('/auth');
+      closeCart();
+      return;
+    }
+
+    if (items.length === 0) return;
+
+    setLoading(true);
+
+    try {
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          total_amount: totalPrice,
+          payment_method: 'card',
+          payment_status: 'pending',
+          delivery_method: 'home',
+          customer_phone: '',
+          customer_email: user.email || '',
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const orderItems = items.map((item) => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.name,
+        product_price: item.price,
+        quantity: item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      const paystackConfig = {
+        reference: `OD-${order.id}-${new Date().getTime()}`,
+        email: user.email || '',
+        amount: totalPrice * 100,
+        publicKey: paystackPublicKey,
+        currency: 'XOF',
+        metadata: {
+          order_id: order.id,
+          custom_fields: [
+            {
+              display_name: "Order ID",
+              variable_name: "order_id",
+              value: order.id
+            }
+          ]
+        },
+      };
+
+      const onSuccess = async (reference: any) => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          await supabase.functions.invoke('verify-paystack-payment', {
+            body: {
+              reference: reference.reference,
+              orderId: order.id,
+            },
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`,
+            },
+          });
+
+          clearCart();
+          closeCart();
+          toast({
+            title: '🎉 Paiement confirmé !',
+            description: 'Votre commande a été effectuée avec succès.',
+          });
+          navigate(`/order-confirmation?order=${order.id}`);
+        } catch (error) {
+          toast({
+            title: 'Erreur',
+            description: 'Erreur lors de la vérification du paiement',
+            variant: 'destructive',
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const onClose = () => {
+        toast({
+          title: '❌ Paiement annulé',
+          description: 'Veuillez réessayer ou choisir un autre moyen de paiement.',
+          variant: 'destructive',
+        });
+        setLoading(false);
+      };
+
+      const initializePayment = usePaystackPayment(paystackConfig);
+      initializePayment({ onSuccess, onClose });
+      
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue',
+        variant: 'destructive',
+      });
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,6 +248,15 @@ const Cart = () => {
                 <span>{t('total')}</span>
                 <span className="text-primary">{totalPrice.toLocaleString()} FCFA</span>
               </div>
+              <Button
+                className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all"
+                size="lg"
+                onClick={handlePayNow}
+                disabled={loading}
+              >
+                <CreditCard className="mr-2 h-5 w-5" />
+                {loading ? 'Chargement...' : 'Procéder au paiement 💰'}
+              </Button>
               <Button
                 className="w-full"
                 size="lg"
