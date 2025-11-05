@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import confetti from "canvas-confetti";
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
@@ -14,6 +15,50 @@ const OrderConfirmation = () => {
   useEffect(() => {
     // Scroll to top on mount
     window.scrollTo(0, 0);
+
+    // Confetti animation
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min;
+    };
+
+    const interval = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+
+      // Gold and primary colored confetti from both sides
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#D4AF37', '#223A70', '#FFD700', '#4169E1'],
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#D4AF37', '#223A70', '#FFD700', '#4169E1'],
+      });
+    }, 250);
+
+    // Additional burst at the start
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#D4AF37', '#223A70', '#FFD700', '#4169E1'],
+      zIndex: 9999,
+    });
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -23,15 +68,15 @@ const OrderConfirmation = () => {
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-2xl mx-auto">
           {/* Success Icon */}
-          <div className="text-center mb-6 md:mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 mb-4">
+          <div className="text-center mb-6 md:mb-8 animate-scale-in">
+            <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 mb-4 animate-pulse">
               <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-primary" />
             </div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-              Merci pour votre commande !
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 animate-fade-in">
+              🎉 Merci pour votre commande !
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground">
-              Votre commande a été enregistrée avec succès
+            <p className="text-sm md:text-base text-muted-foreground animate-fade-in">
+              Votre paiement a été confirmé avec succès
             </p>
           </div>
 
