@@ -1,54 +1,85 @@
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface Review {
-  id: number;
-  author: string;
+  id: string;
   rating: number;
   comment: string;
-  date: string;
-  avatar: string;
+  created_at: string;
+  user_id: string;
 }
 
-const reviews: Review[] = [
-  {
-    id: 1,
-    author: "Marie S.",
-    rating: 5,
-    comment: "Produit conforme à la description, je suis ravie de mon achat !",
-    date: "Il y a 2 jours",
-    avatar: "👩🏾"
-  },
-  {
-    id: 2,
-    author: "Kouassi J.",
-    rating: 4,
-    comment: "Très bon rapport qualité-prix. Livraison rapide.",
-    date: "Il y a 1 semaine",
-    avatar: "👨🏿"
-  },
-  {
-    id: 3,
-    author: "Aya B.",
-    rating: 5,
-    comment: "Excellent ! Je recommande à 100%. Merci OD Shop !",
-    date: "Il y a 2 semaines",
-    avatar: "👩🏿"
-  }
-];
+interface ProductReviewsProps {
+  productId: string;
+}
 
-const ProductReviews = () => {
-  const averageRating = 4.8;
-  const totalReviews = 47;
+const ProductReviews = ({ productId }: ProductReviewsProps) => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('product_id', productId)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setReviews(data as Review[]);
+      }
+      setLoading(false);
+    };
+
+    fetchReviews();
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <Card className="mt-6 md:mt-8">
+        <CardContent className="p-6">
+          <p className="text-center text-muted-foreground">Chargement des avis...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <Card className="mt-6 md:mt-8">
+        <CardHeader>
+          <CardTitle className="text-lg md:text-xl">Avis clients</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground py-6">
+            Aucun avis pour ce produit. Soyez le premier à laisser un avis !
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const averageRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  const totalReviews = reviews.length;
   
-  const ratingDistribution = [
-    { stars: 5, count: 38, percentage: 81 },
-    { stars: 4, count: 7, percentage: 15 },
-    { stars: 3, count: 2, percentage: 4 },
-    { stars: 2, count: 0, percentage: 0 },
-    { stars: 1, count: 0, percentage: 0 },
-  ];
+  const ratingDistribution = [5, 4, 3, 2, 1].map(stars => {
+    const count = reviews.filter(r => r.rating === stars).length;
+    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+    return { stars, count, percentage };
+  });
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+  };
 
   return (
     <Card className="mt-6 md:mt-8">
@@ -95,25 +126,43 @@ const ProductReviews = () => {
 
         {/* Reviews List */}
         <div className="space-y-4">
-          {reviews.map((review) => (
-            <div key={review.id} className="pb-4 border-b last:border-0">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl md:text-3xl">{review.avatar}</span>
-                <div className="flex-1">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-2 mb-2">
-                    <h4 className="font-semibold text-sm md:text-base">{review.author}</h4>
-                    <span className="text-xs text-muted-foreground">{review.date}</span>
+          {reviews.map((review) => {
+            return (
+              <div key={review.id} className="pb-4 border-b last:border-0">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                    😊
                   </div>
-                  <div className="flex gap-1 mb-2">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-primary text-primary" />
-                    ))}
+                  <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-2 mb-2">
+                      <h4 className="font-semibold text-sm md:text-base">Client vérifié</h4>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(review.created_at), { 
+                          addSuffix: true,
+                          locale: fr 
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-3 w-3 ${
+                            i < review.rating 
+                              ? 'fill-yellow-400 text-yellow-400' 
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {review.comment && (
+                      <p className="text-xs md:text-sm text-muted-foreground">{review.comment}</p>
+                    )}
                   </div>
-                  <p className="text-xs md:text-sm text-muted-foreground">{review.comment}</p>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

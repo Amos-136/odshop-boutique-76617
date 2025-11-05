@@ -306,7 +306,7 @@ const ProductDetail = () => {
 
         {/* Reviews */}
         <div className="mt-8 md:mt-12">
-          <ProductReviews />
+          <ProductReviews productId={product.id} />
         </div>
 
         {/* Related Products */}

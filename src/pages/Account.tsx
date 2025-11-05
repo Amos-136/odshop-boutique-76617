@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import OrderTracking from '@/components/OrderTracking';
+import ReviewForm from '@/components/ReviewForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,18 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Star } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface OrderItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  product_price: number;
+  order_id: string;
+  created_at: string;
+}
 
 interface Order {
   id: string;
@@ -21,7 +33,15 @@ interface Order {
   total_amount: number;
   payment_method: string;
   delivery_method: string;
+  delivery_address: string;
   created_at: string;
+  updated_at: string;
+  user_id: string;
+  customer_email?: string;
+  customer_phone?: string;
+  promo_code: string;
+  discount_amount: number;
+  items?: OrderItem[];
 }
 
 const Account = () => {
@@ -31,6 +51,7 @@ const Account = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  const [showReviewForm, setShowReviewForm] = useState<{ orderId: string; productId: string } | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -39,12 +60,24 @@ const Account = () => {
     }
 
     const fetchOrders = async () => {
-      const { data } = await supabase
+      const { data: ordersData } = await supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (data) setOrders(data);
+      if (ordersData) {
+        // Fetch items for each order
+        const ordersWithItems = await Promise.all(
+          ordersData.map(async (order) => {
+            const { data: items } = await supabase
+              .from('order_items')
+              .select('*')
+              .eq('order_id', order.id);
+            return { ...order, items: items || [] };
+          })
+        );
+        setOrders(ordersWithItems);
+      }
       setLoading(false);
     };
 
@@ -73,6 +106,36 @@ const Account = () => {
       }
       return newSet;
     });
+  };
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    try {
+      toast.loading('Génération de la facture...');
+      
+      const { data, error } = await supabase.functions.invoke('generate-invoice', {
+        body: { orderId },
+      });
+
+      if (error) throw error;
+
+      // Create a blob from the HTML and download it
+      const blob = new Blob([data], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `facture-${orderId.slice(0, 8)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.dismiss();
+      toast.success('Facture téléchargée');
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast.dismiss();
+      toast.error('Erreur lors du téléchargement de la facture');
+    }
   };
 
   return (
@@ -133,6 +196,18 @@ const Account = () => {
                           </div>
                         </div>
 
+                        <div className="flex gap-2 mb-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            className="flex-1"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Télécharger la facture
+                          </Button>
+                        </div>
+
                         <Separator className="my-4" />
 
                         <Button
@@ -144,22 +219,71 @@ const Account = () => {
                           {isExpanded ? (
                             <>
                               <ChevronUp className="w-4 h-4 mr-2" />
-                              Masquer le suivi
+                              Masquer les détails
                             </>
                           ) : (
                             <>
                               <ChevronDown className="w-4 h-4 mr-2" />
-                              Voir le suivi de commande
+                              Voir les détails
                             </>
                           )}
                         </Button>
 
                         {isExpanded && (
-                          <div className="mt-4 animate-fade-in">
+                          <div className="mt-4 animate-fade-in space-y-4">
                             <OrderTracking
                               currentStatus={order.status}
                               createdAt={order.created_at}
                             />
+
+                            {/* Order Items */}
+                            {order.items && order.items.length > 0 && (
+                              <>
+                                <Separator />
+                                <div>
+                                  <h4 className="font-semibold mb-3">Articles commandés</h4>
+                                  <div className="space-y-2">
+                                    {order.items.map((item) => (
+                                      <div key={item.id} className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                                        <div>
+                                          <p className="font-medium">{item.product_name}</p>
+                                          <p className="text-sm text-muted-foreground">Quantité: {item.quantity}</p>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="font-semibold">{(item.product_price * item.quantity).toLocaleString()} FCFA</p>
+                                          {order.status === 'delivered' && (
+                                            <Button
+                                              variant="link"
+                                              size="sm"
+                                              onClick={() => setShowReviewForm({ orderId: order.id, productId: item.product_id })}
+                                              className="h-auto p-0 text-xs"
+                                            >
+                                              <Star className="w-3 h-3 mr-1" />
+                                              Laisser un avis
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+
+                            {/* Review Form */}
+                            {showReviewForm && showReviewForm.orderId === order.id && (
+                              <>
+                                <Separator />
+                                <ReviewForm
+                                  productId={showReviewForm.productId}
+                                  orderId={order.id}
+                                  onSuccess={() => {
+                                    setShowReviewForm(null);
+                                    toast.success('Avis publié avec succès !');
+                                  }}
+                                />
+                              </>
+                            )}
                           </div>
                         )}
                       </CardContent>
