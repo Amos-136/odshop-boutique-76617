@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu, User, LogOut, Globe, Search, ChevronDown } from "lucide-react";
+import { ShoppingCart, Menu, User, LogOut, Globe, Search, ChevronDown, Store, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRole } from "@/contexts/RoleContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo-optimized.jpg";
@@ -26,6 +28,7 @@ import { useState } from "react";
 const Navbar = () => {
   const { totalItems, openCart } = useCart();
   const { user, signOut } = useAuth();
+  const { isAdmin, isVendor } = useRole();
   const { language, setLanguage, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
@@ -96,6 +99,23 @@ const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/account">{t('account')}</Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {isVendor && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/vendor">
+                      <Store className="mr-2 h-4 w-4" />
+                      Espace Vendeur
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   {t('signOut')}
@@ -218,6 +238,18 @@ const Navbar = () => {
                     <Link to="/account" className="text-base font-medium py-2">
                       {t('account')}
                     </Link>
+                    {isAdmin && (
+                      <Link to="/admin" className="text-base font-medium py-2 flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    {isVendor && (
+                      <Link to="/vendor" className="text-base font-medium py-2 flex items-center gap-2">
+                        <Store className="h-4 w-4" />
+                        Espace Vendeur
+                      </Link>
+                    )}
                     <Button variant="outline" onClick={signOut} className="w-full">
                       <LogOut className="mr-2 h-4 w-4" />
                       {t('signOut')}

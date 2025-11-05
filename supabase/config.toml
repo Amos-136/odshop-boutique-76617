@@ -1,1 +1,10 @@
 project_id = "kqzhcqiasladwvdvgeyy"
+
+[functions.chatbot]
+verify_jwt = false
+
+[functions.generate-invoice]
+verify_jwt = false
+
+[functions.verify-paystack-payment]
+verify_jwt = false
