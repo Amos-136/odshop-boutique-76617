@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import { usePaystackPayment } from 'react-paystack';
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -26,6 +27,10 @@ const Checkout = () => {
   const [discount, setDiscount] = useState(0);
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState(user?.email || '');
+
+  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '';
 
   const applyPromoCode = async () => {
     if (!promoCode) return;
@@ -67,20 +72,32 @@ const Checkout = () => {
       return;
     }
 
+    if (!email || !phone) {
+      toast({
+        title: 'Erreur',
+        description: 'Veuillez renseigner votre email et numéro de téléphone',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Create order
+      // Create order first
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
           user_id: user.id,
           total_amount: totalPrice - discount,
           payment_method: paymentMethod,
+          payment_status: (paymentMethod === 'cash' || paymentMethod === 'pickup-pay') ? 'pending' : 'pending',
           delivery_method: deliveryMethod,
           delivery_address: deliveryMethod === 'home' ? address : null,
           promo_code: promoCode || null,
           discount_amount: discount,
+          customer_phone: phone,
+          customer_email: email,
         })
         .select()
         .single();
@@ -102,12 +119,101 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      clearCart();
-      toast({
-        title: t('orderSuccess'),
-        description: 'Nous vous enverrons un email de confirmation.',
-      });
-      navigate(`/order-confirmation?order=${order.id}`);
+      // If payment method is online (card or mobile-money), initiate Paystack payment
+      if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
+        const paystackConfig = {
+          reference: `OD-${order.id}-${new Date().getTime()}`,
+          email: email,
+          amount: (totalPrice - discount) * 100, // Paystack expects amount in kobo
+          publicKey: paystackPublicKey,
+          currency: 'XOF',
+          metadata: {
+            order_id: order.id,
+            custom_fields: [
+              {
+                display_name: "Order ID",
+                variable_name: "order_id",
+                value: order.id
+              }
+            ]
+          },
+          channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
+        };
+
+        const onSuccess = async (reference: any) => {
+          console.log('Payment successful:', reference);
+          
+          try {
+            // Verify payment with backend
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            const { data, error } = await supabase.functions.invoke('verify-paystack-payment', {
+              body: {
+                reference: reference.reference,
+                orderId: order.id,
+              },
+              headers: {
+                Authorization: `Bearer ${session?.access_token}`,
+              },
+            });
+
+            if (error) {
+              console.error('Verification error:', error);
+              toast({
+                title: 'Erreur',
+                description: 'Erreur lors de la vérification du paiement',
+                variant: 'destructive',
+              });
+              setLoading(false);
+              return;
+            }
+
+            clearCart();
+            toast({
+              title: t('orderSuccess'),
+              description: 'Paiement confirmé !',
+            });
+            navigate(`/order-confirmation?order=${order.id}`);
+          } catch (verifyError) {
+            console.error('Verification error:', verifyError);
+            toast({
+              title: 'Erreur',
+              description: 'Erreur lors de la vérification du paiement',
+              variant: 'destructive',
+            });
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        const onClose = () => {
+          console.log('Payment popup closed');
+          toast({
+            title: 'Paiement annulé',
+            description: 'Vous avez annulé le paiement',
+            variant: 'destructive',
+          });
+          setLoading(false);
+        };
+
+        // Initialize Paystack payment
+        const initializePayment = usePaystackPayment(paystackConfig);
+        initializePayment({
+          onSuccess,
+          onClose,
+        });
+        
+      } else {
+        // For cash or pickup payments, just confirm the order
+        clearCart();
+        toast({
+          title: t('orderSuccess'),
+          description: 'Nous vous enverrons un email de confirmation.',
+        });
+        navigate(`/order-confirmation?order=${order.id}`);
+        setLoading(false);
+      }
+
     } catch (error) {
       console.error('Order error:', error);
       toast({
@@ -115,7 +221,6 @@ const Checkout = () => {
         description: 'Une erreur est survenue lors de la commande',
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -156,14 +261,38 @@ const Checkout = () => {
               </RadioGroup>
 
               {deliveryMethod === 'home' && (
-                <div className="mt-4">
-                  <Label htmlFor="address">Adresse de livraison</Label>
-                  <Input
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Entrez votre adresse complète"
-                  />
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <Label htmlFor="address">Adresse de livraison</Label>
+                    <Input
+                      id="address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Entrez votre adresse complète"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Numéro de téléphone</Label>
+                    <Input
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+225 XX XX XX XX XX"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="votre@email.com"
+                      required
+                    />
+                  </div>
                 </div>
               )}
             </CardContent>
