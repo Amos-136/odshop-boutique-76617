@@ -32,12 +32,26 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const whatsappMessage = `Bonjour, je suis intéressé(e) par le produit: ${product.name} - ${product.price.toLocaleString()} FCFA`;
   const whatsappUrl = `https://wa.me/2250564397919?text=${encodeURIComponent(whatsappMessage)}`;
 
+  // Vérifier la clé Paystack
+  if (!paystackPublicKey || paystackPublicKey === 'pk_test_your_key_will_be_added_here') {
+    console.error('⚠️ Clé Paystack non configurée');
+  }
+
   const handleAddToCart = () => {
     addToCart(product);
     setTimeout(() => openCart(), 300);
   };
 
   const handleBuyNow = async () => {
+    if (!paystackPublicKey || paystackPublicKey === 'pk_test_your_key_will_be_added_here') {
+      toast({
+        title: '⚠️ Configuration requise',
+        description: 'Paystack n\'est pas encore configuré. Contactez le support.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!user) {
       setShowEmailDialog(true);
       return;
@@ -46,14 +60,25 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   const handleGuestPayment = async () => {
-    if (!guestEmail || !guestPhone) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!guestEmail || !emailRegex.test(guestEmail)) {
       toast({
-        title: 'Erreur',
-        description: 'Veuillez renseigner votre email et téléphone',
+        title: '❌ Email invalide',
+        description: 'Veuillez entrer une adresse email valide',
         variant: 'destructive',
       });
       return;
     }
+
+    if (!guestPhone || guestPhone.length < 8) {
+      toast({
+        title: '❌ Téléphone invalide',
+        description: 'Veuillez entrer un numéro de téléphone valide',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setShowEmailDialog(false);
     await processPayment(guestEmail, guestPhone);
   };
@@ -76,7 +101,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error('Erreur création commande:', orderError);
+        throw new Error('Impossible de créer la commande');
+      }
 
       const { error: itemsError } = await supabase
         .from('order_items')
@@ -88,7 +116,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           quantity: 1,
         });
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Erreur ajout articles:', itemsError);
+        throw new Error('Erreur lors de l\'ajout des articles');
+      }
 
       const paystackConfig = {
         reference: `OD-${order.id}-${new Date().getTime()}`,
@@ -98,11 +129,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
         currency: 'XOF',
         metadata: {
           order_id: order.id,
+          product_name: product.name,
           custom_fields: [
             {
               display_name: "Order ID",
               variable_name: "order_id",
               value: order.id
+            },
+            {
+              display_name: "Product",
+              variable_name: "product_name",
+              value: product.name
             }
           ]
         },
@@ -110,9 +147,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       const onSuccess = async (reference: any) => {
         try {
+          console.log('✅ Paiement Paystack réussi:', reference);
           const { data: { session } } = await supabase.auth.getSession();
           
-          await supabase.functions.invoke('verify-paystack-payment', {
+          const { error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
             body: {
               reference: reference.reference,
               orderId: order.id,
@@ -122,16 +160,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
             } : {},
           });
 
+          if (verifyError) {
+            console.error('Erreur vérification:', verifyError);
+            throw verifyError;
+          }
+
           toast({
             title: '🎉 Paiement confirmé !',
-            description: 'Votre achat a été effectué avec succès.',
+            description: 'Votre commande a été validée avec succès.',
           });
           navigate(`/order-confirmation?order=${order.id}`);
         } catch (error) {
-          console.error('Verification error:', error);
+          console.error('Erreur vérification paiement:', error);
           toast({
-            title: 'Erreur',
-            description: 'Erreur lors de la vérification du paiement',
+            title: '❌ Erreur de vérification',
+            description: 'Le paiement a été effectué mais la vérification a échoué.',
             variant: 'destructive',
           });
         } finally {
@@ -140,22 +183,25 @@ const ProductCard = ({ product }: ProductCardProps) => {
       };
 
       const onClose = () => {
+        console.log('❌ Paiement annulé par l\'utilisateur');
         toast({
           title: '❌ Paiement annulé',
-          description: 'Veuillez réessayer ou choisir un autre moyen de paiement.',
+          description: 'Vous pouvez réessayer ou utiliser WhatsApp.',
           variant: 'destructive',
         });
         setLoading(false);
       };
 
+      console.log('🚀 Initialisation Paystack:', paystackConfig);
       const initializePayment = usePaystackPayment(paystackConfig);
       initializePayment({ onSuccess, onClose });
       
-    } catch (error) {
-      console.error('Order error:', error);
+    } catch (error: any) {
+      console.error('❌ Erreur processPayment:', error);
+      const errorMessage = error.message || 'Une erreur est survenue';
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue',
+        title: '❌ Erreur de paiement',
+        description: errorMessage,
         variant: 'destructive',
       });
       setLoading(false);
@@ -189,30 +235,30 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </CardContent>
         <CardFooter className="p-3 md:p-4 pt-0 flex flex-col gap-2">
           <Button 
-            className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all" 
+            className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 font-semibold" 
             size="sm"
             onClick={handleBuyNow}
             disabled={loading}
           >
             <CreditCard className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
-            <span className="text-xs md:text-sm">{loading ? 'Chargement...' : 'Acheter maintenant 💳'}</span>
+            <span className="text-xs md:text-sm">{loading ? '⏳ Chargement...' : 'Acheter maintenant 💳'}</span>
           </Button>
           <div className="flex gap-2 w-full">
             <Button 
-              className="flex-1" 
+              className="flex-1 font-semibold" 
               size="sm"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
-              <span className="text-xs md:text-sm">Panier</span>
+              <span className="text-xs md:text-sm">🛒 Panier</span>
             </Button>
             <Button 
-              className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" 
+              className="flex-1 bg-[#25D366] text-white hover:bg-[#25D366]/90 transition-all duration-300 font-semibold" 
               size="sm"
               asChild
             >
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <span className="text-xs md:text-sm">WhatsApp</span>
+                <span className="text-xs md:text-sm">💬 WhatsApp</span>
               </a>
             </Button>
           </div>

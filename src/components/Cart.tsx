@@ -27,6 +27,11 @@ const Cart = () => {
   
   const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '';
 
+  // Vérifier la clé Paystack
+  if (!paystackPublicKey || paystackPublicKey === 'pk_test_your_key_will_be_added_here') {
+    console.error('⚠️ Clé Paystack non configurée');
+  }
+
   const generateWhatsAppMessage = () => {
     if (items.length === 0) return "";
     
@@ -57,6 +62,15 @@ const Cart = () => {
   };
 
   const handlePayNow = async () => {
+    if (!paystackPublicKey || paystackPublicKey === 'pk_test_your_key_will_be_added_here') {
+      toast({
+        title: '⚠️ Configuration requise',
+        description: 'Paystack n\'est pas encore configuré. Contactez le support.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!user) {
       setShowEmailDialog(true);
       return;
@@ -66,14 +80,25 @@ const Cart = () => {
   };
 
   const handleGuestPayment = async () => {
-    if (!guestEmail || !guestPhone) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!guestEmail || !emailRegex.test(guestEmail)) {
       toast({
-        title: 'Erreur',
-        description: 'Veuillez renseigner votre email et téléphone',
+        title: '❌ Email invalide',
+        description: 'Veuillez entrer une adresse email valide',
         variant: 'destructive',
       });
       return;
     }
+
+    if (!guestPhone || guestPhone.length < 8) {
+      toast({
+        title: '❌ Téléphone invalide',
+        description: 'Veuillez entrer un numéro de téléphone valide',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setShowEmailDialog(false);
     await processPayment(guestEmail, guestPhone);
   };
@@ -96,7 +121,10 @@ const Cart = () => {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error('Erreur création commande:', orderError);
+        throw new Error('Impossible de créer la commande');
+      }
 
       const orderItems = items.map((item) => ({
         order_id: order.id,
@@ -110,7 +138,10 @@ const Cart = () => {
         .from('order_items')
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Erreur ajout articles:', itemsError);
+        throw new Error('Erreur lors de l\'ajout des articles');
+      }
 
       const paystackConfig = {
         reference: `OD-${order.id}-${new Date().getTime()}`,
@@ -120,11 +151,17 @@ const Cart = () => {
         currency: 'XOF',
         metadata: {
           order_id: order.id,
+          total_items: items.length,
           custom_fields: [
             {
               display_name: "Order ID",
               variable_name: "order_id",
               value: order.id
+            },
+            {
+              display_name: "Items",
+              variable_name: "total_items",
+              value: items.length
             }
           ]
         },
@@ -132,9 +169,10 @@ const Cart = () => {
 
       const onSuccess = async (reference: any) => {
         try {
+          console.log('✅ Paiement Paystack réussi:', reference);
           const { data: { session } } = await supabase.auth.getSession();
           
-          await supabase.functions.invoke('verify-paystack-payment', {
+          const { error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
             body: {
               reference: reference.reference,
               orderId: order.id,
@@ -144,17 +182,23 @@ const Cart = () => {
             } : {},
           });
 
+          if (verifyError) {
+            console.error('Erreur vérification:', verifyError);
+            throw verifyError;
+          }
+
           clearCart();
           closeCart();
           toast({
             title: '🎉 Paiement confirmé !',
-            description: 'Votre commande a été effectuée avec succès.',
+            description: 'Votre commande a été validée avec succès.',
           });
           navigate(`/order-confirmation?order=${order.id}`);
         } catch (error) {
+          console.error('Erreur vérification paiement:', error);
           toast({
-            title: 'Erreur',
-            description: 'Erreur lors de la vérification du paiement',
+            title: '❌ Erreur de vérification',
+            description: 'Le paiement a été effectué mais la vérification a échoué.',
             variant: 'destructive',
           });
         } finally {
@@ -163,21 +207,25 @@ const Cart = () => {
       };
 
       const onClose = () => {
+        console.log('❌ Paiement annulé par l\'utilisateur');
         toast({
           title: '❌ Paiement annulé',
-          description: 'Veuillez réessayer ou choisir un autre moyen de paiement.',
+          description: 'Vous pouvez réessayer ou utiliser WhatsApp.',
           variant: 'destructive',
         });
         setLoading(false);
       };
 
+      console.log('🚀 Initialisation Paystack:', paystackConfig);
       const initializePayment = usePaystackPayment(paystackConfig);
       initializePayment({ onSuccess, onClose });
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Erreur processPayment:', error);
+      const errorMessage = error.message || 'Une erreur est survenue';
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue',
+        title: '❌ Erreur de paiement',
+        description: errorMessage,
         variant: 'destructive',
       });
       setLoading(false);
@@ -275,13 +323,13 @@ const Cart = () => {
               {/* Primary Payment Buttons */}
               <div className="space-y-3">
                 <Button
-                  className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all"
+                  className="w-full bg-[#223A70] text-white hover:bg-[#223A70]/90 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 font-semibold"
                   size="lg"
                   onClick={handlePayNow}
                   disabled={loading}
                 >
                   <CreditCard className="mr-2 h-5 w-5" />
-                  {loading ? 'Chargement...' : 'Procéder au paiement 💰'}
+                  {loading ? '⏳ Chargement...' : '💳 Procéder au paiement'}
                 </Button>
                 
                 <Button
@@ -298,10 +346,10 @@ const Cart = () => {
               <div className="space-y-2">
                 <Button
                   variant="outline"
-                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white border-[#25D366]"
+                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white border-[#25D366] transition-all duration-300 font-semibold"
                   onClick={handleWhatsAppOrder}
                 >
-                  {t('orderWhatsApp')}
+                  💬 {t('orderWhatsApp')}
                 </Button>
               </div>
 
