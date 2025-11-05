@@ -5,11 +5,15 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import OrderTracking from '@/components/OrderTracking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -26,6 +30,7 @@ const Account = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user) {
@@ -47,12 +52,27 @@ const Account = () => {
   }, [user, navigate]);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive"> = {
-      pending: 'secondary',
-      processing: 'default',
-      delivered: 'default'
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive", label: string }> = {
+      pending: { variant: 'secondary', label: 'En attente' },
+      confirmed: { variant: 'default', label: 'Confirmée' },
+      preparing: { variant: 'default', label: 'En préparation' },
+      shipped: { variant: 'default', label: 'Expédiée' },
+      delivered: { variant: 'default', label: 'Livrée' }
     };
-    return <Badge variant={variants[status] || 'default'}>{t(status)}</Badge>;
+    const config = statusConfig[status] || { variant: 'default', label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const toggleOrderExpanded = (orderId: string) => {
+    setExpandedOrders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(orderId)) {
+        newSet.delete(orderId);
+      } else {
+        newSet.add(orderId);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -80,39 +100,72 @@ const Account = () => {
                   </CardContent>
                 </Card>
               ) : (
-                orders.map((order) => (
-                  <Card key={order.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">
-                          Commande #{order.id.slice(0, 8)}
-                        </CardTitle>
-                        {getStatusBadge(order.status)}
-                      </div>
-                      <CardDescription>
-                        {format(new Date(order.created_at), 'dd MMMM yyyy', {
-                          locale: language === 'fr' ? fr : undefined
-                        })}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Total:</span>
-                          <span className="font-semibold">{order.total_amount.toLocaleString()} FCFA</span>
+                orders.map((order) => {
+                  const isExpanded = expandedOrders.has(order.id);
+                  return (
+                    <Card key={order.id} className="overflow-hidden">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">
+                            Commande #{order.id.slice(0, 8)}
+                          </CardTitle>
+                          {getStatusBadge(order.status)}
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('paymentMethod')}:</span>
-                          <span>{order.payment_method}</span>
+                        <CardDescription>
+                          {format(new Date(order.created_at), 'dd MMMM yyyy à HH:mm', {
+                            locale: language === 'fr' ? fr : undefined
+                          })}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm mb-4">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Total:</span>
+                            <span className="font-semibold">{order.total_amount.toLocaleString()} FCFA</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{t('paymentMethod')}:</span>
+                            <span>{order.payment_method}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{t('deliveryMethod')}:</span>
+                            <span>{order.delivery_method}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('deliveryMethod')}:</span>
-                          <span>{order.delivery_method}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+
+                        <Separator className="my-4" />
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleOrderExpanded(order.id)}
+                          className="w-full"
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="w-4 h-4 mr-2" />
+                              Masquer le suivi
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-4 h-4 mr-2" />
+                              Voir le suivi de commande
+                            </>
+                          )}
+                        </Button>
+
+                        {isExpanded && (
+                          <div className="mt-4 animate-fade-in">
+                            <OrderTracking
+                              currentStatus={order.status}
+                              createdAt={order.created_at}
+                            />
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })
               )}
             </TabsContent>
 
