@@ -10,6 +10,9 @@ import { usePaystackPayment } from 'react-paystack';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, isOpen, closeCart, clearCart } = useCart();
@@ -18,6 +21,9 @@ const Cart = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
   
   const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '';
 
@@ -52,26 +58,40 @@ const Cart = () => {
 
   const handlePayNow = async () => {
     if (!user) {
-      navigate('/auth');
-      closeCart();
+      setShowEmailDialog(true);
       return;
     }
-
     if (items.length === 0) return;
+    await processPayment(user.email || '', '');
+  };
 
+  const handleGuestPayment = async () => {
+    if (!guestEmail || !guestPhone) {
+      toast({
+        title: 'Erreur',
+        description: 'Veuillez renseigner votre email et téléphone',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setShowEmailDialog(false);
+    await processPayment(guestEmail, guestPhone);
+  };
+
+  const processPayment = async (email: string, phone: string) => {
     setLoading(true);
 
     try {
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: user.id,
+          user_id: user?.id || null,
           total_amount: totalPrice,
           payment_method: 'card',
           payment_status: 'pending',
           delivery_method: 'home',
-          customer_phone: '',
-          customer_email: user.email || '',
+          customer_phone: phone,
+          customer_email: email,
         })
         .select()
         .single();
@@ -94,7 +114,7 @@ const Cart = () => {
 
       const paystackConfig = {
         reference: `OD-${order.id}-${new Date().getTime()}`,
-        email: user.email || '',
+        email: email,
         amount: totalPrice * 100,
         publicKey: paystackPublicKey,
         currency: 'XOF',
@@ -119,9 +139,9 @@ const Cart = () => {
               reference: reference.reference,
               orderId: order.id,
             },
-            headers: {
-              Authorization: `Bearer ${session?.access_token}`,
-            },
+            headers: session?.access_token ? {
+              Authorization: `Bearer ${session.access_token}`,
+            } : {},
           });
 
           clearCart();
@@ -282,6 +302,41 @@ const Cart = () => {
           </>
         )}
       </SheetContent>
+
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Informations de contact</DialogTitle>
+            <DialogDescription>
+              Veuillez fournir votre email et téléphone pour procéder au paiement
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cart-guest-email">Email</Label>
+              <Input
+                id="cart-guest-email"
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="votre@email.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cart-guest-phone">Téléphone</Label>
+              <Input
+                id="cart-guest-phone"
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value)}
+                placeholder="+225 XX XX XX XX XX"
+              />
+            </div>
+          </div>
+          <Button onClick={handleGuestPayment} className="w-full">
+            Continuer vers le paiement
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 };
