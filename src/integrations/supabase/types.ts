@@ -55,11 +55,15 @@ export type Database = {
       orders: {
         Row: {
           created_at: string | null
+          customer_email: string | null
+          customer_phone: string | null
           delivery_address: string | null
           delivery_method: string
           discount_amount: number | null
           id: string
           payment_method: string
+          payment_reference: string | null
+          payment_status: string | null
           promo_code: string | null
           status: string
           total_amount: number
@@ -68,11 +72,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          customer_email?: string | null
+          customer_phone?: string | null
           delivery_address?: string | null
           delivery_method: string
           discount_amount?: number | null
           id?: string
           payment_method: string
+          payment_reference?: string | null
+          payment_status?: string | null
           promo_code?: string | null
           status?: string
           total_amount: number
@@ -81,11 +89,15 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          customer_email?: string | null
+          customer_phone?: string | null
           delivery_address?: string | null
           delivery_method?: string
           discount_amount?: number | null
           id?: string
           payment_method?: string
+          payment_reference?: string | null
+          payment_status?: string | null
           promo_code?: string | null
           status?: string
           total_amount?: number
